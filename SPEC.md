@@ -80,6 +80,22 @@ zero-length `b02` at 100 removes **both** bases adjacent to the point: `a01` los
 when it is subtracted. Nobody predicts this correctly; encode what bedtools prints, add a
 comment, move on.
 
+**A zero-length feature at position 0 makes bedtools abort.** **(measured)** — as the
+`-b` side it exits 1 having printed nothing:
+
+    $ bedtools intersect -a data/b.bed -b data/a.bed
+    ERROR: Received illegal bin number -1 from getBin call.
+    Maximum values is: 2396745
+
+`data/a.bed`'s `a12` is `chr2 0 0`, which widens to `[-1, 1)` under the rule above, and
+bedtools' binning index rejects the negative coordinate. It is the same `[p-1, p+1)`
+widening that `subtract` shows, surfacing as a crash instead of a coordinate.
+
+It is **specific to the `-b` side**: the identical record as `-a` exits 0. So there is no
+correct output to diff against, and a golden case that puts `a.bed` on `-b` has to exclude
+`a12` — `tests/golden/intersect.sh` does exactly that, with the reason in a comment. This
+is a bedtools limitation, not a behaviour to reproduce: `mytools` handles the record.
+
 So there are **two overlap predicates in the tool**: strict for normal intervals,
 inclusive for zero-length ones. Do not unify them and do not reason about zero-length
 intervals from first principles — run bedtools and match it. `data/a.bed` contains three
