@@ -67,6 +67,19 @@ at `chr1 500 500`:
 | `498..499` | no | |
 | `501..502` | no | |
 
+**Zero-length intervals also distort output coordinates, not just hit/miss.**
+**(measured on the fixtures)**:
+
+    bedtools merge -i <sorted a.bed>        ->  chr1 499 600
+    bedtools subtract -a a.bed -b b.bed     ->  chr1 50 99   (a01 was 0..100)
+                                            ->  chr1 101 180 (a02 was 100..200)
+
+`merge` expands the zero-length `a07` at 500 **leftwards** to 499. `subtract` against the
+zero-length `b02` at 100 removes **both** bases adjacent to the point: `a01` loses base
+99, and `a02` loses base 100. A zero-length feature therefore behaves as `[p-1, p+1)`
+when it is subtracted. Nobody predicts this correctly; encode what bedtools prints, add a
+comment, move on.
+
 So there are **two overlap predicates in the tool**: strict for normal intervals,
 inclusive for zero-length ones. Do not unify them and do not reason about zero-length
 intervals from first principles — run bedtools and match it. `data/a.bed` contains three
