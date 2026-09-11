@@ -8,6 +8,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:      # lets you re-run CI by hand from the Actions tab
 
 jobs:
   test:
