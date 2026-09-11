@@ -66,7 +66,7 @@ def overlaps(a, b):
         return False
     a_start, a_end = _span(a)
     b_start, b_end = _span(b)
-    return a_start < b_end and b_start < a_end
+    return a_start < b_end and b_start <= a_end
 
 
 def _f32(value):
